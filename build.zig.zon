@@ -1,0 +1,17 @@
+.{
+    .name = .math3d,
+    .version = "0.1.0",
+    .fingerprint = 0xbdd78ef8c080e410,
+    .minimum_zig_version = "0.16.0",
+
+    .paths = .{
+        "CHANGELOG.md",
+        "LICENSE",
+        "README.md",
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+
+    .dependencies = .{},
+}
