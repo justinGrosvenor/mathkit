@@ -167,3 +167,9 @@ test "vec2 reflect / project / reject / angleBetween" {
 
     try std.testing.expectApproxEqAbs(std.math.pi / 2.0, Vec2.angleBetween(Vec2.unit_x, Vec2.unit_y), 1e-6);
 }
+
+test "vec2 zero-input edge cases" {
+    try std.testing.expect(Vec2.normalize(Vec2.zero).eql(Vec2.zero));
+    try std.testing.expect(Vec2.project(Vec2.unit_x, Vec2.zero).eql(Vec2.zero));
+    try std.testing.expect(Vec2.angleBetween(Vec2.unit_x, Vec2.zero) == 0);
+}

@@ -161,3 +161,17 @@ test "vec3 helpers" {
     try std.testing.expect(v.reject(Vec3.unit_x).approxEql(Vec3.new(0, 2, 0), 1e-6));
     try std.testing.expectApproxEqAbs(std.math.pi / 2.0, Vec3.angleBetween(Vec3.unit_x, Vec3.unit_y), 1e-6);
 }
+
+test "vec3 lerp endpoints and midpoint" {
+    const a = Vec3.zero;
+    const b = Vec3.new(10, 20, -30);
+    try std.testing.expect(Vec3.lerp(a, b, 0).approxEql(a, 1e-6));
+    try std.testing.expect(Vec3.lerp(a, b, 1).approxEql(b, 1e-6));
+    try std.testing.expect(Vec3.lerp(a, b, 0.5).approxEql(Vec3.new(5, 10, -15), 1e-6));
+}
+
+test "vec3 zero-input edge cases" {
+    try std.testing.expect(Vec3.normalize(Vec3.zero).eql(Vec3.zero));
+    try std.testing.expect(Vec3.project(Vec3.unit_x, Vec3.zero).eql(Vec3.zero));
+    try std.testing.expect(Vec3.angleBetween(Vec3.unit_x, Vec3.zero) == 0);
+}

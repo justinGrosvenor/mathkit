@@ -112,3 +112,15 @@ test "vec4 helpers" {
     try std.testing.expect(Vec4.neg(Vec4.new(1, -2, 3, -4)).eql(Vec4.new(-1, 2, -3, 4)));
     try std.testing.expect(Vec4.saturate(Vec4.new(-1, 0.25, 2, 1)).eql(Vec4.new(0, 0.25, 1, 1)));
 }
+
+test "vec4 length and normalize" {
+    const v = Vec4.new(1, 2, 2, 0);
+    try std.testing.expectApproxEqAbs(@as(f32, 3.0), v.length(), 1e-6);
+    try std.testing.expectApproxEqAbs(@as(f32, 1.0), v.normalize().length(), 1e-6);
+    try std.testing.expect(Vec4.normalize(Vec4.zero).eql(Vec4.zero));
+}
+
+test "vec4 lerp" {
+    const mid = Vec4.lerp(Vec4.zero, Vec4.new(2, 4, 6, 8), 0.5);
+    try std.testing.expect(mid.approxEql(Vec4.new(1, 2, 3, 4), 1e-6));
+}

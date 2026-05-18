@@ -249,3 +249,25 @@ test "color lerp" {
     try std.testing.expectApproxEqAbs(@as(f32, 0.5), mid.g, 1e-5);
     try std.testing.expectApproxEqAbs(@as(f32, 0.5), mid.b, 1e-5);
 }
+
+test "color scale vs scaleAll" {
+    const c = Color.new(0.4, 0.4, 0.4, 0.8);
+    const s = c.scale(0.5);
+    try std.testing.expectApproxEqAbs(@as(f32, 0.2), s.r, 1e-6);
+    try std.testing.expectApproxEqAbs(@as(f32, 0.8), s.a, 1e-6);
+    const sa = c.scaleAll(0.5);
+    try std.testing.expectApproxEqAbs(@as(f32, 0.2), sa.r, 1e-6);
+    try std.testing.expectApproxEqAbs(@as(f32, 0.4), sa.a, 1e-6);
+}
+
+test "color hsv green blue and gray" {
+    try std.testing.expect(Color.fromHsv(120, 1, 1).approxEql(Color.green, 1e-5));
+    try std.testing.expect(Color.fromHsv(240, 1, 1).approxEql(Color.blue, 1e-5));
+    try std.testing.expect(Color.fromHsv(0, 0, 0.5).approxEql(Color.new(0.5, 0.5, 0.5, 1), 1e-5));
+}
+
+test "color vec4 roundtrip and withAlpha" {
+    const c = Color.new(0.1, 0.2, 0.3, 0.4);
+    try std.testing.expect(Color.fromVec4(c.toVec4()).eql(c));
+    try std.testing.expect(c.withAlpha(1).eql(Color.new(0.1, 0.2, 0.3, 1)));
+}

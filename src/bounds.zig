@@ -256,3 +256,56 @@ test "aabb helpers" {
     try std.testing.expect(a.closestPoint(Vec3.new(3, -1, 1)).eql(Vec3.new(2, 0, 1)));
     try std.testing.expectApproxEqAbs(@as(f32, 8), a.volume(), 1e-6);
 }
+
+test "rect accessors" {
+    const r = Rect.new(1, 2, 10, 20);
+    try std.testing.expectApproxEqAbs(@as(f32, 10), r.width(), 1e-6);
+    try std.testing.expectApproxEqAbs(@as(f32, 20), r.height(), 1e-6);
+    try std.testing.expectApproxEqAbs(@as(f32, 200), r.area(), 1e-6);
+    try std.testing.expect(r.center().approxEql(Vec2.new(6, 12), 1e-6));
+    try std.testing.expect(r.size().eql(Vec2.new(10, 20)));
+}
+
+test "rect expand merge pad" {
+    const r = Rect.new(0, 0, 10, 10);
+    try std.testing.expect(r.expand(Vec2.new(-5, 12)).eql(Rect.fromMinMax(Vec2.new(-5, 0), Vec2.new(10, 12))));
+    const merged = Rect.merge(Rect.new(0, 0, 1, 1), Rect.new(5, 5, 1, 1));
+    try std.testing.expect(merged.eql(Rect.fromMinMax(Vec2.zero, Vec2.new(6, 6))));
+    try std.testing.expect(r.pad(1).eql(Rect.fromMinMax(Vec2.new(-1, -1), Vec2.new(11, 11))));
+}
+
+test "rect intersection disjoint returns null" {
+    const a = Rect.new(0, 0, 1, 1);
+    const b = Rect.new(5, 5, 1, 1);
+    try std.testing.expect(a.intersection(b) == null);
+}
+
+test "aabb accessors and containsAABB" {
+    const box = AABB.fromCenterExtents(Vec3.new(1, 2, 3), Vec3.new(2, 2, 2));
+    try std.testing.expect(box.center().approxEql(Vec3.new(1, 2, 3), 1e-6));
+    try std.testing.expect(box.extents().approxEql(Vec3.new(2, 2, 2), 1e-6));
+    try std.testing.expect(box.size().approxEql(Vec3.new(4, 4, 4), 1e-6));
+    const inner = AABB.fromCenterExtents(Vec3.new(1, 2, 3), Vec3.one);
+    try std.testing.expect(box.containsAABB(inner));
+    try std.testing.expect(!inner.containsAABB(box));
+}
+
+test "aabb transformed by translation" {
+    const box = AABB.new(Vec3.new(-1, -1, -1), Vec3.new(1, 1, 1));
+    const moved = box.transformed(Mat4.translate(Vec3.new(10, 0, 0)));
+    try std.testing.expect(moved.min.approxEql(Vec3.new(9, -1, -1), 1e-5));
+    try std.testing.expect(moved.max.approxEql(Vec3.new(11, 1, 1), 1e-5));
+}
+
+test "aabb transformed by 45deg Y rotation grows to sqrt(2)" {
+    const box = AABB.new(Vec3.new(-1, -1, -1), Vec3.new(1, 1, 1));
+    const rotated = box.transformed(Mat4.rotateY(std.math.pi / 4.0));
+    const sqrt2: f32 = @sqrt(2.0);
+    try std.testing.expectApproxEqAbs(-sqrt2, rotated.min.x, 1e-5);
+    try std.testing.expectApproxEqAbs(sqrt2, rotated.max.x, 1e-5);
+    try std.testing.expectApproxEqAbs(-sqrt2, rotated.min.z, 1e-5);
+    try std.testing.expectApproxEqAbs(sqrt2, rotated.max.z, 1e-5);
+    // Y is unchanged.
+    try std.testing.expectApproxEqAbs(@as(f32, -1), rotated.min.y, 1e-5);
+    try std.testing.expectApproxEqAbs(@as(f32, 1), rotated.max.y, 1e-5);
+}
