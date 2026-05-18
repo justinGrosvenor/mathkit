@@ -13,7 +13,11 @@ pub const Mat3 = extern struct {
         0, 0, 1,
     } };
 
-    pub const zero = Mat3{ .m = .{0} ** 9 };
+    pub const zero = Mat3{ .m = .{
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0,
+    } };
 
     pub fn col(self: Mat3, c: u2) Vec3 {
         const i: usize = @as(usize, c) * 3;

@@ -14,7 +14,12 @@ pub const Mat4 = extern struct {
         0, 0, 0, 1,
     } };
 
-    pub const zero = Mat4{ .m = .{0} ** 16 };
+    pub const zero = Mat4{ .m = .{
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+    } };
 
     pub fn fromColumns(c0: Vec4, c1: Vec4, c2: Vec4, c3: Vec4) Mat4 {
         return .{ .m = .{
