@@ -20,7 +20,7 @@ Targets the Zig `0.16` build API.
 Fetch the package and save it to `build.zig.zon`:
 
 ```sh
-zig fetch --save git+https://github.com/<user>/mathkit
+zig fetch --save git+https://github.com/justinGrosvenor/mathkit
 ```
 
 Then wire the module in `build.zig`:
