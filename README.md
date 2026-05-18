@@ -4,7 +4,7 @@ Small 2D/3D math utilities for Zig rendering and game projects.
 
 `mathkit` is intentionally compact: vectors, matrices, quaternions, transforms,
 colors, bounds, rays, frustum tests, easing, and deterministic Perlin/fBm noise.
-It is developed alongside `droids`, so the API favors direct data types that are
+It is developed alongside `droids-engine`, so the API favors direct data types that are
 easy to upload to graphics APIs and simple enough to audit.
 
 ## Status
@@ -50,8 +50,8 @@ const model = math.Mat4.mul(
 - Floating-point math uses `f32`.
 - Matrices are column-major and columns are stored contiguously.
 - Vectors are treated as column vectors: `Mat4.mul(a, b)` composes `a * b`.
-- Coordinates are right-handed.
-- `Vec3.forward` is `-Z`, `Vec3.up` is `+Y`, and `Vec3.right` is `+X`.
+- Coordinates default to right-handed: `Vec3.forward` is `-Z`, `Vec3.up` is `+Y`, and `Vec3.right` is `+X`.
+- Left-handed variants are provided for engines that use `+Z` forward (e.g. Mach): `Vec3.forward_lh`, `Mat4.lookAtLH`, `Mat4.perspectiveLH`, `Mat4.orthoLH`, and `Transform.forwardLH`.
 - Perspective and orthographic projection map clip-space Z to `[0, 1]`, matching WebGPU and D3D-style depth.
 - Quaternions are stored as `(x, y, z, w)`, with `w` as the scalar component.
 - `Quat.fromEulerXYZ(x, y, z)` applies X, then Y, then Z rotation and is equivalent to `rotateZ(z) * rotateY(y) * rotateX(x)`. X is pitch, Y is yaw, Z is roll.

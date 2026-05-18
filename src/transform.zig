@@ -56,6 +56,10 @@ pub const Transform = struct {
         return self.rotation.rotateVec(Vec3.forward);
     }
 
+    pub fn forwardLH(self: Transform) Vec3 {
+        return self.rotation.rotateVec(Vec3.forward_lh);
+    }
+
     pub fn right(self: Transform) Vec3 {
         return self.rotation.rotateVec(Vec3.right);
     }

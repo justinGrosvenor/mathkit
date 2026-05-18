@@ -8,6 +8,9 @@ with the relaxed pre-1.0 rule: minor bumps may be breaking.
 
 ### Added
 
+- Left-handed coordinate variants for engine interop (Mach, Unreal, D3D world conventions):
+  `Vec3.forward_lh`, `Mat4.lookAtLH`, `Mat4.perspectiveLH`, `Mat4.orthoLH`, and
+  `Transform.forwardLH`. The default API remains right-handed.
 - `Quat.fromMat3(m)` / `Quat.fromMat4(m)` — Shoemake trace-based decomposition.
 - `Quat.fromTo(from, to)` — shortest-arc rotation, with stable antiparallel handling.
 - `Transform.fromMat4(m)` — TRS decomposition with reflection-safe sign assignment to X scale.

@@ -12,6 +12,7 @@ pub const Vec3 = extern struct {
     pub const unit_z = Vec3{ .z = 1 };
     pub const up = unit_y;
     pub const forward = Vec3{ .z = -1 };
+    pub const forward_lh = Vec3{ .z = 1 };
     pub const right = unit_x;
 
     pub fn new(x: f32, y: f32, z: f32) Vec3 {

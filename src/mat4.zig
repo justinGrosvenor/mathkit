@@ -197,6 +197,24 @@ pub const Mat4 = extern struct {
         } };
     }
 
+    /// Left-handed look-at view matrix (camera looks down +Z). Provided for
+    /// interop with engines like Mach that use a left-handed coordinate system.
+    /// Returns null if eye equals target, or if the forward direction is parallel to world_up.
+    pub fn lookAtLH(eye: Vec3, target: Vec3, world_up: Vec3) ?Mat4 {
+        const f = Vec3.normalize(Vec3.sub(target, eye));
+        if (f.lengthSq() == 0) return null;
+        const s = Vec3.normalize(Vec3.cross(world_up, f));
+        if (s.lengthSq() == 0) return null;
+        const u = Vec3.cross(f, s);
+
+        return .{ .m = .{
+            s.x,               u.x,               f.x,               0,
+            s.y,               u.y,               f.y,               0,
+            s.z,               u.z,               f.z,               0,
+            -Vec3.dot(s, eye), -Vec3.dot(u, eye), -Vec3.dot(f, eye), 1,
+        } };
+    }
+
     /// Perspective projection. fov_y in radians. Clip space z: [0, 1] (WebGPU).
     pub fn perspective(fov_y: f32, aspect: f32, near: f32, far: f32) Mat4 {
         const f = 1.0 / @tan(fov_y * 0.5);
@@ -208,6 +226,21 @@ pub const Mat4 = extern struct {
         result.m[10] = far * range_inv;
         result.m[11] = -1;
         result.m[14] = near * far * range_inv;
+        return result;
+    }
+
+    /// Left-handed perspective projection. fov_y in radians. Clip space z: [0, 1].
+    /// Pairs with `lookAtLH`. Use this when targeting a left-handed engine like Mach.
+    pub fn perspectiveLH(fov_y: f32, aspect: f32, near: f32, far: f32) Mat4 {
+        const f = 1.0 / @tan(fov_y * 0.5);
+        const range_inv = 1.0 / (far - near);
+
+        var result = zero;
+        result.m[0] = f / aspect;
+        result.m[5] = f;
+        result.m[10] = far * range_inv;
+        result.m[11] = 1;
+        result.m[14] = -near * far * range_inv;
         return result;
     }
 
@@ -224,6 +257,23 @@ pub const Mat4 = extern struct {
         result.m[12] = -(right_ + left) * rl;
         result.m[13] = -(top + bottom) * tb;
         result.m[14] = near * fn_;
+        result.m[15] = 1;
+        return result;
+    }
+
+    /// Left-handed orthographic projection. Clip space z: [0, 1].
+    pub fn orthoLH(left: f32, right_: f32, bottom: f32, top: f32, near: f32, far: f32) Mat4 {
+        const rl = 1.0 / (right_ - left);
+        const tb = 1.0 / (top - bottom);
+        const fn_ = 1.0 / (far - near);
+
+        var result = zero;
+        result.m[0] = 2 * rl;
+        result.m[5] = 2 * tb;
+        result.m[10] = fn_;
+        result.m[12] = -(right_ + left) * rl;
+        result.m[13] = -(top + bottom) * tb;
+        result.m[14] = -near * fn_;
         result.m[15] = 1;
         return result;
     }
@@ -450,4 +500,34 @@ test "mat4 lookAt degenerate inputs return null" {
     try std.testing.expect(Mat4.lookAt(Vec3.zero, Vec3.zero, Vec3.up) == null);
     // forward parallel to world_up
     try std.testing.expect(Mat4.lookAt(Vec3.zero, Vec3.new(0, 1, 0), Vec3.up) == null);
+}
+
+test "mat4 lookAtLH maps target to +Z in view space" {
+    // Camera at z=-5 looking toward origin in a LH world: target ends up in
+    // front of the camera at view-space +Z.
+    const view = Mat4.lookAtLH(Vec3.new(0, 0, -5), Vec3.zero, Vec3.up).?;
+    const origin_view = view.mulVec(Vec4.new(0, 0, 0, 1));
+    try std.testing.expectApproxEqAbs(@as(f32, 5.0), origin_view.z, 1e-5);
+}
+
+test "mat4 lookAtLH degenerate inputs return null" {
+    try std.testing.expect(Mat4.lookAtLH(Vec3.zero, Vec3.zero, Vec3.up) == null);
+    try std.testing.expect(Mat4.lookAtLH(Vec3.zero, Vec3.new(0, 1, 0), Vec3.up) == null);
+}
+
+test "mat4 perspectiveLH z range" {
+    const p = Mat4.perspectiveLH(std.math.pi / 4.0, 1.0, 0.1, 100.0);
+    // In LH the near plane is at view-space z = +near.
+    const near_pt = p.mulVec(Vec4.new(0, 0, 0.1, 1));
+    try std.testing.expectApproxEqAbs(@as(f32, 0.0), near_pt.z / near_pt.w, 1e-5);
+    const far_pt = p.mulVec(Vec4.new(0, 0, 100, 1));
+    try std.testing.expectApproxEqAbs(@as(f32, 1.0), far_pt.z / far_pt.w, 1e-4);
+}
+
+test "mat4 orthoLH z range" {
+    const p = Mat4.orthoLH(-1, 1, -1, 1, 0.1, 100.0);
+    const near_pt = p.mulVec(Vec4.new(0, 0, 0.1, 1));
+    try std.testing.expectApproxEqAbs(@as(f32, 0.0), near_pt.z, 1e-5);
+    const far_pt = p.mulVec(Vec4.new(0, 0, 100, 1));
+    try std.testing.expectApproxEqAbs(@as(f32, 1.0), far_pt.z, 1e-5);
 }
