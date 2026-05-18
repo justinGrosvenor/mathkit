@@ -1,7 +1,7 @@
 .{
-    .name = .math3d,
+    .name = .mathkit,
     .version = "0.1.0",
-    .fingerprint = 0xbdd78ef8c080e410,
+    .fingerprint = 0xe1b0f64dfea36157,
     .minimum_zig_version = "0.16.0",
 
     .paths = .{

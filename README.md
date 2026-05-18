@@ -1,8 +1,8 @@
-# math3d
+# mathkit
 
 Small 2D/3D math utilities for Zig rendering and game projects.
 
-`math3d` is intentionally compact: vectors, matrices, quaternions, transforms,
+`mathkit` is intentionally compact: vectors, matrices, quaternions, transforms,
 colors, bounds, rays, frustum tests, easing, and deterministic Perlin/fBm noise.
 It is developed alongside `droids`, so the API favors direct data types that are
 easy to upload to graphics APIs and simple enough to audit.
@@ -20,24 +20,24 @@ Targets the Zig `0.16` build API.
 Fetch the package and save it to `build.zig.zon`:
 
 ```sh
-zig fetch --save git+https://github.com/<user>/math3d
+zig fetch --save git+https://github.com/<user>/mathkit
 ```
 
 Then wire the module in `build.zig`:
 
 ```zig
-const math3d_dep = b.dependency("math3d", .{
+const mathkit_dep = b.dependency("mathkit", .{
     .target = target,
     .optimize = optimize,
 });
 
-exe.root_module.addImport("math3d", math3d_dep.module("math3d"));
+exe.root_module.addImport("mathkit", mathkit_dep.module("mathkit"));
 ```
 
 Use it from Zig source:
 
 ```zig
-const math = @import("math3d");
+const math = @import("mathkit");
 
 const model = math.Mat4.mul(
     math.Mat4.translate(math.Vec3.new(0, 1, 0)),

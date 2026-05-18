@@ -235,6 +235,34 @@ pub const Quat = extern struct {
         };
     }
 
+    /// Extract intrinsic XYZ Euler angles (radians) from a unit quaternion.
+    /// Inverse of `fromEulerXYZ`. Returns (pitch, yaw, roll) as a Vec3.
+    pub fn toEulerXYZ(q: Quat) Vec3 {
+        const sinp = 2.0 * (q.w * q.y - q.z * q.x);
+        const pitch_y = if (sinp >= 1.0)
+            std.math.pi / 2.0
+        else if (sinp <= -1.0)
+            -std.math.pi / 2.0
+        else
+            std.math.asin(sinp);
+
+        if (@abs(sinp) >= 0.9999) {
+            const roll_x = 0;
+            const yaw_z = 2.0 * std.math.atan2(q.x, q.w);
+            return Vec3.new(roll_x, pitch_y, yaw_z);
+        }
+
+        const roll_x = std.math.atan2(
+            2.0 * (q.w * q.x + q.y * q.z),
+            1.0 - 2.0 * (q.x * q.x + q.y * q.y),
+        );
+        const yaw_z = std.math.atan2(
+            2.0 * (q.w * q.z + q.x * q.y),
+            1.0 - 2.0 * (q.y * q.y + q.z * q.z),
+        );
+        return Vec3.new(roll_x, pitch_y, yaw_z);
+    }
+
     pub fn eql(a: Quat, b: Quat) bool {
         return a.x == b.x and a.y == b.y and a.z == b.z and a.w == b.w;
     }
@@ -340,6 +368,24 @@ test "quat fromTo rotates from onto to" {
         const q = Quat.fromTo(c.from, c.to);
         const rotated = q.rotateVec(c.from);
         try std.testing.expect(rotated.approxEql(c.to, 1e-4));
+    }
+}
+
+test "quat toEulerXYZ round trips fromEulerXYZ" {
+    const cases = [_][3]f32{
+        .{ 0.3, -0.7, 1.1 },
+        .{ 0, 0, 0 },
+        .{ 0.5, 0, 0 },
+        .{ 0, 0.8, 0 },
+        .{ 0, 0, -0.4 },
+        .{ -1.2, 0.3, 0.6 },
+    };
+    for (cases) |c| {
+        const q = Quat.fromEulerXYZ(c[0], c[1], c[2]);
+        const e = q.toEulerXYZ();
+        try std.testing.expectApproxEqAbs(c[0], e.x, 1e-4);
+        try std.testing.expectApproxEqAbs(c[1], e.y, 1e-4);
+        try std.testing.expectApproxEqAbs(c[2], e.z, 1e-4);
     }
 }
 

@@ -1,10 +1,37 @@
 # Changelog
 
-All notable changes to `math3d` are documented here. The format follows
+All notable changes to `mathkit` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/), and versions follow semver
 with the relaxed pre-1.0 rule: minor bumps may be breaking.
 
 ## [Unreleased]
+
+### Added
+
+- `Quat.fromMat3(m)` / `Quat.fromMat4(m)` — Shoemake trace-based decomposition.
+- `Quat.fromTo(from, to)` — shortest-arc rotation, with stable antiparallel handling.
+- `Transform.fromMat4(m)` — TRS decomposition with reflection-safe sign assignment to X scale.
+- `Mat4.transformNormal(n)` — correct normal transform via the normal matrix (returns null if singular).
+- `Mat4.fromColumns(c0, c1, c2, c3)` and `AABB.fromPoints(slice)`.
+- `Vec2.project`, `Vec2.reject`, `Vec2.reflect`, `Vec2.angleBetween` — parity with Vec3.
+- `Color.scaleAll(s)` — like `Color.scale` but includes alpha.
+- `Color.toBytes() [4]u8` — WebGPU `rgba8unorm` memory order.
+- `Plane.ground` — XZ plane at y=0 (convenience for picking).
+
+### Changed
+
+- `Mat4.transformDirection` renamed to `Mat4.transformDirectionFast`; the new
+  `Mat4.transformNormal` should be preferred whenever the matrix has
+  non-uniform scale.
+- `Mat4.lookAt` returns `?Mat4`; previously silently returned identity on
+  degenerate input.
+- `Mat4.scaling` renamed to `Mat4.scale`.
+- `Ray.intersectPlane` now takes a `Plane` instead of separate `(normal, d)` args.
+- `Ray.new` removed in favor of struct-literal construction. Callers normalize `dir` explicitly.
+- `Quat.fromEuler` and `Quat.fromYawPitchRoll` removed; use `Quat.fromEulerXYZ`.
+- `Transform.transformDir` alias removed.
+- `Mat3/Mat4.inverse` epsilon threshold raised from `1e-12` to `1e-6` (correct for f32).
+- `Color.scale` is now documented as RGB-only (alpha unchanged); use `scaleAll` for all four channels.
 
 ## [0.1.0] - 2026-05-14
 
