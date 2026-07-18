@@ -6,6 +6,11 @@ with the relaxed pre-1.0 rule: minor bumps may be breaking.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-18
+
+Breaking: several renames and removals listed under Changed. Per the pre-1.0
+rule above, this is a minor bump.
+
 ### Added
 
 - Left-handed coordinate variants for engine interop (Mach, Unreal, D3D world conventions):
